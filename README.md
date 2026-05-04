@@ -2,7 +2,7 @@
 
 Installer for the official `klingai_api_skill`.
 
-It installs the skill into the OpenClaw workspace, imports the Kling API Access Key and Secret Key into the skill's default credentials store, and creates workspace links for `klingai_api_skill` and `klingai`.
+It installs the skill into the OpenClaw workspace, imports the Kling API Access Key and Secret Key into the skill's default credentials store, and creates a workspace link for `klingai_api_skill`.
 
 ## Usage
 
@@ -33,4 +33,4 @@ Defaults inside the OpenClaw container:
 - `REPO_URL=https://github.com/puboc/klingai_api_skill.git`
 - `REPO_REF=main`
 
-If run on the host and an `openclaw` container exists, the installer execs itself inside that container. It also creates convenience symlinks at `$WORKSPACE_DIR/skills/klingai_api_skill` and `$WORKSPACE_DIR/skills/klingai`.
+If run on the host and an `openclaw` container exists, the installer execs itself inside that container. It also creates a convenience symlink at `$WORKSPACE_DIR/skills/klingai_api_skill`.

@@ -17,12 +17,11 @@ OPENCLAW_HOME="${OPENCLAW_HOME:-${DEFAULT_OPENCLAW_HOME}}"
 WORKSPACE_DIR="${WORKSPACE_DIR:-${OPENCLAW_HOME}/workspace}"
 SKILLS_DIR="${SKILLS_DIR:-${OPENCLAW_HOME}/skills}"
 SKILL_NAME="${SKILL_NAME:-klingai_api_skill}"
-SKILL_ALIAS="${SKILL_ALIAS:-klingai}"
 SKILL_DIR="${SKILLS_DIR}/${SKILL_NAME}"
 REPO_DIR="${WORKSPACE_DIR}/${SKILL_NAME}-source"
 WORKSPACE_SKILLS_DIR="${WORKSPACE_SKILLS_DIR:-${WORKSPACE_DIR}/skills}"
 WORKSPACE_SKILL_LINK="${WORKSPACE_SKILLS_DIR}/${SKILL_NAME}"
-WORKSPACE_SKILL_ALIAS_LINK="${WORKSPACE_SKILLS_DIR}/${SKILL_ALIAS}"
+LEGACY_WORKSPACE_SKILL_ALIAS_LINK="${WORKSPACE_SKILLS_DIR}/klingai"
 STATUS_LOG_FILE="${STATUS_LOG_FILE:-/tmp/klingai-api-skill-install.log}"
 
 log_status() {
@@ -110,7 +109,6 @@ if ! is_inside_container; then
       -e SKILL_GITHUB_TOKEN="${SKILL_GITHUB_TOKEN}" \
       -e GITHUB_TOKEN="${GITHUB_TOKEN:-}" \
       -e SKILL_NAME="${SKILL_NAME}" \
-      -e SKILL_ALIAS="${SKILL_ALIAS}" \
       -e KLING_ACCESS_KEY_ID="${KLING_ACCESS_KEY_ID}" \
       -e KLING_SECRET_ACCESS_KEY="${KLING_SECRET_ACCESS_KEY}" \
       -e KLING_API_BASE="${KLING_API_BASE:-}"
@@ -186,18 +184,14 @@ node "${SKILL_DIR}/scripts/kling.mjs" --help >/dev/null
 
 rm -rf "${WORKSPACE_SKILL_LINK}"
 ln -s "${SKILL_DIR}" "${WORKSPACE_SKILL_LINK}"
-if [[ -n "${SKILL_ALIAS}" && "${SKILL_ALIAS}" != "${SKILL_NAME}" ]]; then
-  if [[ -e "${WORKSPACE_SKILL_ALIAS_LINK}" && ! -L "${WORKSPACE_SKILL_ALIAS_LINK}" ]]; then
-    log_status "Skipped alias link because a non-symlink path already exists: ${WORKSPACE_SKILL_ALIAS_LINK}"
-  else
-    rm -f "${WORKSPACE_SKILL_ALIAS_LINK}"
-    ln -s "${SKILL_DIR}" "${WORKSPACE_SKILL_ALIAS_LINK}"
+if [[ -L "${LEGACY_WORKSPACE_SKILL_ALIAS_LINK}" ]]; then
+  alias_target="$(readlink "${LEGACY_WORKSPACE_SKILL_ALIAS_LINK}")"
+  if [[ "${alias_target}" == "${SKILL_DIR}" ]]; then
+    rm -f "${LEGACY_WORKSPACE_SKILL_ALIAS_LINK}"
+    log_status "Removed legacy workspace alias: ${LEGACY_WORKSPACE_SKILL_ALIAS_LINK}"
   fi
 fi
 
 log_status "Installed Kling AI API skill at ${SKILL_DIR} with credentials imported"
 echo "Installed ${SKILL_NAME} at ${SKILL_DIR}"
 echo "Workspace link: ${WORKSPACE_SKILL_LINK} -> ${SKILL_DIR}"
-if [[ -n "${SKILL_ALIAS}" && "${SKILL_ALIAS}" != "${SKILL_NAME}" && -L "${WORKSPACE_SKILL_ALIAS_LINK}" ]]; then
-  echo "Workspace alias: ${WORKSPACE_SKILL_ALIAS_LINK} -> ${SKILL_DIR}"
-fi
